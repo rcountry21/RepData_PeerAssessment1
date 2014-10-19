@@ -9,15 +9,16 @@ output:
 ## Loading and preprocessing the data
 ```{r}
 df <- read.csv("activity.csv", header=TRUE, sep=",", na.strings="NA")
+
+df$date = as.Date(as.character(df$date), "%Y-%m-%d")
+dfClean <- na.omit(df)
+
 ```
 
 ## What is mean total number of steps taken per day?
 The following shows a histogram of the total steps taken per day.
 
 ```{r}
-df$date = as.Date(as.character(df$date), "%Y-%m-%d")
-dfClean <- na.omit(df)
-
 histData = tapply(dfClean$steps, dfClean$date, sum)
 hist(histData, xlab="Total Steps per day", main="Frequency of Total steps per Day")
 ```
@@ -102,12 +103,11 @@ The median total number of steps taken per day with imputation (pure avg): **`r 
 To answer the following question posited in the assignment:
 Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
-The asnwer is: The affect depends on if, and how, you round the average number of steps.  Initially, with no rounding, I got what I thought was a strange.  The average was exactly the same and the median was exactly the same as the mean.  It makes sense that the mean would remain the same, as by imputing all values using the mean that value won't shift.  
+The asnwer is: The affect depends on if, and how, you round the average number of steps.  Initially, with no rounding, I got what I thought was a strange.  The average was exactly the same and the median was exactly the same as the mean.  It makes sense that the mean would remain the same, that value would remain constant since every new value is equal to the mean.  
 
-However, this infers that we are calculating partial steps.  So, I tried rounding the numbers to see if that would change the mean and median, and by how much.  
+However, the problem is this infers that we are calculating partial steps.  So, I tried rounding the numbers to see if that would change the mean and median, and by how much.  
 
-My conclusion is that you have to be careful how you impute data, and what the imputing means in terms of the 
-real data.  In this case, it makes sense to use the median or a rounded mean since in our actual data we do not have partial steps.  
+My conclusion is that you have to be careful how you impute data, and what the imputing means in terms of the real data.  In this case, it makes sense to use the median or a rounded mean since in our actual data we do not have partial steps.  
 
 ------------------------------------------------------------------------------------------------
 
@@ -155,7 +155,7 @@ The median total number of steps taken per day with imputation (rounding up): **
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-So to start, creating new data frame with new column "isWeekday" with values "weekend" or "weekday"
+So to start, creating new data frame with new columns "isWeekday" and "day"
 
 ```{r}
 dfWeekendCompare <- dfClean
@@ -163,7 +163,11 @@ dfWeekendCompare$day <- weekdays(as.Date(dfWeekendCompare$date))
 dfWeekendCompare$isWeekend <- 0
 dfWeekendCompare$isWeekend[which(dfWeekendCompare$day == "Saturday")] <- 1
 dfWeekendCompare$isWeekend[which(dfWeekendCompare$day == "Sunday")] <- 1
+```  
 
+Once we have the data we want in the columns, the data is broken by the 2 different groups (weekday and Weekend).  After using tapply to find the mean by interval, those values are plotted in the same fashion as was done earlier.
+
+```{r}
 dfWeekend <- dfWeekendCompare[dfWeekendCompare$isWeekend == 0,]
 dfWeekday <- dfWeekendCompare[dfWeekendCompare$isWeekend == 1,]
 
